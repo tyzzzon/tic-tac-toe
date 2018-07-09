@@ -23,9 +23,24 @@ class Board extends React.Component {
 		);
 	}
 
+	prepareBoard() {
+
+    }
+
 	render() {
+	    let a = '';
+	    a+='<div>';
+	    for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                a+=(i*3+j).toString();
+            }
+	    }
+
+
+
 		return (
-			<div>
+            {a}
+			/*<div>
 				<div className="board-row">
 					{this.renderSquare(0)}
 					{this.renderSquare(1)}
@@ -41,8 +56,8 @@ class Board extends React.Component {
                     {this.renderSquare(7)}
                     {this.renderSquare(8)}
                 </div>
-			</div>
-		);
+			</div>*/
+        );
 	}
 }
 
