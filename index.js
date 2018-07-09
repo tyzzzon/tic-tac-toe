@@ -12,6 +12,14 @@ function Square(props) {
 	);
 }
 
+function divWrapper(content, classes = '') {
+    return (
+        <div className={classes}>
+            {content}
+        </div>
+    );
+}
+
 class Board extends React.Component {
 	renderSquare(i) {
 		return (
@@ -23,41 +31,18 @@ class Board extends React.Component {
 		);
 	}
 
-	prepareBoard() {
-
-    }
-
 	render() {
-	    let a = '';
-	    a+='<div>';
+	    let board = Array();
 	    for (let i = 0; i < 3; i++) {
-                for (let j = 0; j < 3; j++) {
-                a+=(i*3+j).toString();
+            let row = Array();
+            for (let j = 0; j < 3; j++) {
+                row.push(this.renderSquare(i*3+j));
             }
+            row = divWrapper(row, 'board-row');
+            board.push(row);
 	    }
 
-
-
-		return (
-            {a}
-			/*<div>
-				<div className="board-row">
-					{this.renderSquare(0)}
-					{this.renderSquare(1)}
-					{this.renderSquare(2)}
-				</div>
-                <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
-                </div>
-			</div>*/
-        );
+		return divWrapper(board);
 	}
 }
 
