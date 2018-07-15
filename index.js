@@ -32,9 +32,9 @@ class Board extends React.Component {
 	}
 
 	render() {
-	    let board = Array();
+	    let board = [];
 	    for (let i = 0; i < 3; i++) {
-            let row = Array();
+            let row = [];
             for (let j = 0; j < 3; j++) {
                 row.push(this.renderSquare(i*3+j));
             }
@@ -63,8 +63,16 @@ class Game extends React.Component {
     }
 
     handleClick(i) {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length - 1];
+        let history = this.state.history.slice();
+        let current;
+        if (this.state.isReversed)  {
+            history.splice(0, Math.abs(this.state.stepNumber-history.length + 1));
+            current = history[0];
+        }
+        else {
+            history.splice(this.state.stepNumber+1);
+            current = history[history.length - 1];
+        }
         const squares = current.squares.slice();
         const moveNumber = current.moveNumber;
         if (calculateWinCombination(squares) || squares[i]) {
@@ -72,7 +80,11 @@ class Game extends React.Component {
         }
         squares[i] = this.state.xIsNext ? 'X': 'O';
         this.setState({
-            history: history.concat([{
+            history: this.state.isReversed ? [{
+                squares: squares,
+                lastMove: [i % 3 + 1, Math.floor(i / 3) + 1],
+                moveNumber: moveNumber+1,
+            }].concat(history) : history.concat([{
                 squares: squares,
                 lastMove: [i % 3 + 1, Math.floor(i / 3) + 1],
                 moveNumber: moveNumber+1,
@@ -100,7 +112,7 @@ class Game extends React.Component {
         const history = this.state.history;
         const abs = Math.abs(this.state.stepNumber-history.length + 1);
         const current = this.state.isReversed ? history[abs] : history[this.state.stepNumber];
-        const winCombination = calculateWinCombination(current.squares);
+        const gameResult = calculateWinCombination(current.squares);
 
         const moves = history.map((step) => {
             const desc = (step.moveNumber ? 'Go to move #' + step.moveNumber : 'Go to game start') +
@@ -114,12 +126,17 @@ class Game extends React.Component {
 
         let status;
         let winArray = Array(9).fill(null);
-        if (winCombination) {
-            for (let i = 0; i < 3; i++) {
-                winArray[winCombination[i]] = true;
+        if (gameResult) {
+            if (gameResult !== 'It\'s a draw!') {
+                for (let i = 0; i < 3; i++) {
+                    winArray[gameResult.winCombination[i]] = true;
+                }
+                const winner = gameResult.winner;
+                status = 'Winner: ' + winner;
             }
-            const winner = winCombination[0];
-            status = 'Winner: ' + winner;
+            else {
+                status = gameResult;
+            }
         } else {
             status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
@@ -160,12 +177,20 @@ function calculateWinCombination(squares) {
         [2, 5, 8],
         [0, 4, 8],
         [2, 4, 6],
-	];
-	for (let i = 0; i < lines.length; i++) {
-		const [a, b, c] = lines[i];
-		if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-			return lines[i];
-		}
-	}
-	return null;
+    ];
+    for (let i = 0; i < lines.length; i++) {
+        const [a, b, c] = lines[i];
+        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+            return {
+                winner: squares[a],
+                winCombination: lines[i]
+            };
+        }
+    }
+    if (!squares.some((el) => {
+        return (el === null);
+    })) {
+        return "It's a draw!";
+    }
+    return null;
 }
